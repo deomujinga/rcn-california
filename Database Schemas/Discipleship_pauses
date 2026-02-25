@@ -1,0 +1,56 @@
+Field
+Type
+Null
+Key
+Default
+Extra
+id
+bigint(20) unsigned
+NO
+PRI
+NULL
+auto_increment
+participant_id
+bigint(20) unsigned
+NO
+MUL
+NULL
+program_id
+int(11)
+NO
+MUL
+NULL
+level_id
+bigint(20) unsigned
+NO
+MUL
+NULL
+paused_at
+datetime
+NO
+NULL
+resumed_at
+datetime
+YES
+NULL
+reason
+varchar(255)
+YES
+NULL
+created_by
+bigint(20) unsigned
+YES
+NULL
+updated_at
+datetime
+NO
+current_timestamp()
+on update current_timestamp()
+updated_by
+bigint(20) unsigned
+YES
+NULL
+created_at
+datetime
+NO
+current_timestamp()

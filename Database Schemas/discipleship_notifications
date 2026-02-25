@@ -1,0 +1,32 @@
+Field
+Type
+Null
+Key
+Default
+Extra
+id
+bigint(20) unsigned
+NO
+PRI
+NULL
+auto_increment
+user_id
+bigint(20) unsigned
+NO
+NULL
+message
+text
+NO
+NULL
+type
+enum('missed','promotion','general')
+YES
+general
+is_read
+tinyint(1)
+YES
+0
+created_at
+datetime
+YES
+current_timestamp()

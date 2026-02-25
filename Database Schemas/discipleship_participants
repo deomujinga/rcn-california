@@ -1,0 +1,71 @@
+
+Field
+Type
+Null
+Key
+Default
+Extra
+id
+bigint(20) unsigned
+NO
+PRI
+NULL
+auto_increment
+user_id
+bigint(20) unsigned
+NO
+NULL
+program_id
+bigint(20) unsigned
+NO
+MUL
+NULL
+current_level_id
+bigint(20) unsigned
+YES
+NULL
+level_start_date
+date
+YES
+NULL
+status
+enum('active','paused','completed','dropped')
+YES
+active
+attainment
+decimal(5,2)
+YES
+0.00
+created_at
+datetime
+YES
+current_timestamp()
+updated_at
+datetime
+YES
+current_timestamp()
+on update current_timestamp()
+in_grace_period
+tinyint(1)
+NO
+0
+grace_start_date
+datetime
+YES
+NULL
+promoted_at
+datetime
+YES
+NULL
+next_level_id
+bigint(20) unsigned
+YES
+NULL
+last_attainment_calc
+datetime
+YES
+NULL
+grace_cycle_count
+int(11)
+YES
+0

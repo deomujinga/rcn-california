@@ -1,0 +1,45 @@
+Field
+Type
+Null
+Key
+Default
+Extra
+id
+bigint(20) unsigned
+NO
+PRI
+NULL
+auto_increment
+participant_id
+bigint(20) unsigned
+NO
+MUL
+NULL
+level_id
+bigint(20) unsigned
+NO
+NULL
+attainment
+decimal(5,2)
+YES
+0.00
+start_date
+date
+YES
+NULL
+end_date
+date
+YES
+NULL
+promoted_by
+bigint(20) unsigned
+YES
+NULL
+notes
+text
+YES
+NULL
+created_at
+datetime
+YES
+current_timestamp()

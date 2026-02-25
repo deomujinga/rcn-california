@@ -1,0 +1,28 @@
+Field
+Type
+Null
+Key
+Default
+Extra
+id
+bigint(20) unsigned
+NO
+PRI
+NULL
+auto_increment
+action
+varchar(255)
+NO
+NULL
+details
+text
+YES
+NULL
+performed_by
+bigint(20) unsigned
+YES
+NULL
+created_at
+datetime
+YES
+current_timestamp()

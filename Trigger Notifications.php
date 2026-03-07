@@ -40,6 +40,38 @@ function rcn_get_notification_templates() {
             'type'    => 'general',
             'subject' => 'Notification',
             'body'    => "Hello {name},\n\n{message}\n\nBlessings!"
+        ],
+        
+        // Friday encouragement templates (randomly selected by cron)
+        'friday_encouragement_1' => [
+            'type'    => 'encouragement',
+            'subject' => 'You missed some discipleship submissions',
+            'body'    => "Grace upon grace, {name}. We know this journey isn't always easy, but don't give up. You're growing more than you realize.\n\nBlessings!"
+        ],
+        
+        'friday_encouragement_2' => [
+            'type'    => 'encouragement',
+            'subject' => 'You missed some discipleship submissions',
+            'body'    => "Hello {name},\n\nIt's okay to stumble. What matters is that you keep going. We're cheering you on every step of the way!\n\nBlessings!"
+        ],
+        
+        'friday_encouragement_3' => [
+            'type'    => 'encouragement',
+            'subject' => 'You missed some discipleship submissions',
+            'body'    => "This path takes courage. If it's been hard, you're not alone. Take a breath, reset, and keep moving forward. You've got this!\n\nBlessings!"
+        ],
+        
+        'friday_encouragement_4' => [
+            'type'    => 'encouragement',
+            'subject' => 'You missed some discipleship submissions',
+            'body'    => "Hey {name}, we noticed you missed a submission. That's okay, sometimes the journey stretches us. Give yourself grace and keep going. You're doing better than you think.\n\nBlessings!"
+        ],
+        
+        // Zero attainment - scored 0% for missed week(s)
+        'zero_attainment' => [
+            'type'    => 'zero_attainment',
+            'subject' => 'Missed week(s) scored as 0%',
+            'body'    => "Hello {name},\n\nWe noticed you missed {weeks_count} week(s) of discipleship submissions.\n\nThe following week(s) have been recorded as 0% attainment:\n{weeks_list}\n\nYour cumulative attainment is now {attainment}%.\n\nIt's not too late to get back on track! Please submit your weekly report to continue your discipleship journey.\n\nBlessings!"
         ]
     ];
 }
@@ -152,5 +184,29 @@ function rcn_trigger_promotion_notification($user_id, $prev_level_name, $next_le
 function rcn_trigger_program_completed_notification($user_id) {
     rcn_send_notification_from_template($user_id, 'program_completed', []);
 	error_log("[discipleship] === rcn_trigger_program_completed_notification");
+}
 
+/**
+ * Trigger zero attainment notification when disciple misses week(s)
+ * 
+ * @param int   $user_id      The disciple's user ID
+ * @param array $weeks        Array of week_start dates that were scored 0%
+ * @param float $attainment   The new cumulative attainment after zeros applied
+ */
+function rcn_trigger_zero_attainment_notification($user_id, $weeks, $attainment) {
+    $weeks_count = count($weeks);
+    
+    // Format weeks list for email
+    $weeks_list = '';
+    foreach ($weeks as $week) {
+        $weeks_list .= "- Week of {$week}\n";
+    }
+    
+    rcn_send_notification_from_template($user_id, 'zero_attainment', [
+        'weeks_count' => $weeks_count,
+        'weeks_list'  => trim($weeks_list),
+        'attainment'  => number_format($attainment, 1),
+    ]);
+    
+    error_log("[discipleship] === rcn_trigger_zero_attainment_notification for user {$user_id}, {$weeks_count} week(s)");
 }

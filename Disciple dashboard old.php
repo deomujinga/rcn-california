@@ -1922,7 +1922,7 @@ add_shortcode('discipleship_dashboard', function () {
         <canvas id="trend"></canvas>
       </div>
       <div class="card">
-        <h2>Level Practice Strength Map</h2>
+        <h2>Current Level Strength Map</h2>
         <canvas id="radar"></canvas>
         <div id="projection" class="sub" style="margin-top:8px">
           <?php

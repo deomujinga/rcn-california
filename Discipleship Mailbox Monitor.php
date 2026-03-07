@@ -127,7 +127,8 @@ register_activation_hook(__FILE__, function () {
  * CAPABILITIES
  * ------------------------- */
 add_action('init', function () {
-    $roles = ['administrator', 'discipleship_leader'];
+    // Grant to specific roles
+    $roles = ['administrator', 'discipleship_leader', 'leader'];
 
     foreach ($roles as $role_name) {
         $role = get_role($role_name);
@@ -135,7 +136,30 @@ add_action('init', function () {
             $role->add_cap('view_mailbox_monitor');
         }
     }
-});
+}, 15); // Priority 15 to run AFTER Create Roles.php (priority 12)
+
+/**
+ * Also grant view_mailbox_monitor to anyone with access_leadership capability
+ * This ensures leaders can see it regardless of their specific role name
+ */
+add_filter('user_has_cap', function ($allcaps, $caps, $args, $user) {
+    // If checking for view_mailbox_monitor capability
+    if (!in_array('view_mailbox_monitor', $caps, true)) {
+        return $allcaps;
+    }
+    
+    // If user already has it, skip
+    if (!empty($allcaps['view_mailbox_monitor'])) {
+        return $allcaps;
+    }
+    
+    // Grant if user has access_leadership or is admin
+    if (!empty($allcaps['access_leadership']) || !empty($allcaps['manage_options'])) {
+        $allcaps['view_mailbox_monitor'] = true;
+    }
+    
+    return $allcaps;
+}, 10, 4);
 
 /* -------------------------
  * ADMIN MENU

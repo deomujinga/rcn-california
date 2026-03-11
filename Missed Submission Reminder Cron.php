@@ -22,15 +22,22 @@ if (!defined('ABSPATH')) exit;
  */
 function rcn_get_reminder_config() {
     $defaults = [
-        'reminder_day'       => 1,     // 1 = Monday (0=Sun, 1=Mon, ..., 6=Sat)
-        'reminder_hour'      => 18,    // 6 PM
-        'encouragement_day'  => 5,     // 5 = Friday
-        'encouragement_hour' => 18,    // 6 PM
-        'enabled'            => true,  // Master switch
+        'reminder_day'         => 1,     // 1 = Monday (0=Sun, 1=Mon, ..., 6=Sat)
+        'reminder_hour'        => 18,    // 6 PM
+        'reminder_enabled'     => true,  // First reminder (e.g. Monday)
+        'encouragement_day'    => 5,     // 5 = Friday
+        'encouragement_hour'   => 18,    // 6 PM
+        'encouragement_enabled'=> true,  // Encouragement (e.g. Friday)
     ];
     
     $config = get_option('rcn_reminder_cron_config', []);
-    return wp_parse_args($config, $defaults);
+    $merged = wp_parse_args($config, $defaults);
+    // Backward compat: old 'enabled' overrides both if present
+    if (isset($config['enabled']) && !isset($config['reminder_enabled']) && !isset($config['encouragement_enabled'])) {
+        $merged['reminder_enabled'] = !empty($config['enabled']);
+        $merged['encouragement_enabled'] = !empty($config['enabled']);
+    }
+    return $merged;
 }
 
 /**
@@ -61,12 +68,6 @@ function rcn_schedule_reminder_cron() {
 add_action('rcn_daily_reminder_check', 'rcn_process_reminder_cron');
 function rcn_process_reminder_cron() {
     $config = rcn_get_reminder_config();
-    
-    // Check if reminders are enabled
-    if (empty($config['enabled'])) {
-        return;
-    }
-    
     $tz = wp_timezone();
     $now = new DateTime('now', $tz);
     $current_day = (int) $now->format('w');  // 0 = Sunday, 1 = Monday, etc.
@@ -77,7 +78,8 @@ function rcn_process_reminder_cron() {
     $today = $now->format('Y-m-d');
     
     // Monday/Reminder check
-    if ($current_day === (int) $config['reminder_day'] && 
+    if (!empty($config['reminder_enabled']) &&
+        $current_day === (int) $config['reminder_day'] && 
         $current_hour >= (int) $config['reminder_hour']) {
         
         $run_key = 'reminder_' . $today;
@@ -90,7 +92,8 @@ function rcn_process_reminder_cron() {
     }
     
     // Friday/Encouragement check
-    if ($current_day === (int) $config['encouragement_day'] && 
+    if (!empty($config['encouragement_enabled']) &&
+        $current_day === (int) $config['encouragement_day'] && 
         $current_hour >= (int) $config['encouragement_hour']) {
         
         $run_key = 'encouragement_' . $today;
@@ -356,11 +359,12 @@ add_action('admin_init', function() {
         check_admin_referer('rcn_reminder_settings')) {
         
         $config = [
-            'enabled'            => !empty($_POST['enabled']),
-            'reminder_day'       => (int) $_POST['reminder_day'],
-            'reminder_hour'      => (int) $_POST['reminder_hour'],
-            'encouragement_day'  => (int) $_POST['encouragement_day'],
-            'encouragement_hour' => (int) $_POST['encouragement_hour'],
+            'reminder_enabled'      => !empty($_POST['reminder_enabled']),
+            'reminder_day'          => (int) ($_POST['reminder_day'] ?? 1),
+            'reminder_hour'         => (int) ($_POST['reminder_hour'] ?? 18),
+            'encouragement_enabled' => !empty($_POST['encouragement_enabled']),
+            'encouragement_day'     => (int) ($_POST['encouragement_day'] ?? 5),
+            'encouragement_hour'    => (int) ($_POST['encouragement_hour'] ?? 18),
         ];
         
         rcn_save_reminder_config($config);
@@ -466,19 +470,18 @@ function rcn_submission_reminders_settings_page() {
             
             <table class="form-table">
                 <tr>
-                    <th scope="row">Enable Reminders</th>
-                    <td>
-                        <label>
-                            <input type="checkbox" name="enabled" value="1" <?php checked($config['enabled']); ?>>
-                            Send reminder notifications to disciples
-                        </label>
-                    </td>
-                </tr>
-                
-                <tr>
                     <th scope="row" colspan="2" style="padding-bottom: 0;">
                         <h3 style="margin: 0;">📅 First Reminder (e.g., Monday)</h3>
                     </th>
+                </tr>
+                <tr>
+                    <th scope="row">Enable</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="reminder_enabled" value="1" <?php checked(!empty($config['reminder_enabled'])); ?>>
+                            Send first reminder notifications
+                        </label>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Day</th>
@@ -509,6 +512,15 @@ function rcn_submission_reminders_settings_page() {
                     <th scope="row" colspan="2" style="padding-bottom: 0;">
                         <h3 style="margin: 0;">💬 Encouragement (e.g., Friday)</h3>
                     </th>
+                </tr>
+                <tr>
+                    <th scope="row">Enable</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="encouragement_enabled" value="1" <?php checked(!empty($config['encouragement_enabled'])); ?>>
+                            Send encouragement notifications
+                        </label>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Day</th>

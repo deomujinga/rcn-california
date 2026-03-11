@@ -52,9 +52,8 @@ add_shortcode('rcn_send_notifications', function () {
     // Configuration data
     $opted_in = rcn_is_leader_opted_in_missed_alerts($current_user_id);
     $config = function_exists('rcn_get_reminder_config') ? rcn_get_reminder_config() : [
-        'reminder_day' => 1, 'reminder_hour' => 18,
-        'encouragement_day' => 5, 'encouragement_hour' => 18,
-        'enabled' => true,
+        'reminder_day' => 1, 'reminder_hour' => 18, 'reminder_enabled' => true,
+        'encouragement_day' => 5, 'encouragement_hour' => 18, 'encouragement_enabled' => true,
     ];
     $day_labels = [
         0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday',
@@ -71,11 +70,12 @@ add_shortcode('rcn_send_notifications', function () {
             
             if ($is_admin && isset($_POST['rcn_schedule_config'])) {
                 $new_config = [
-                    'reminder_day'       => intval($_POST['reminder_day'] ?? 1),
-                    'reminder_hour'      => intval($_POST['reminder_hour'] ?? 18),
-                    'encouragement_day'  => intval($_POST['encouragement_day'] ?? 5),
-                    'encouragement_hour' => intval($_POST['encouragement_hour'] ?? 18),
-                    'enabled'            => !empty($_POST['reminders_enabled']),
+                    'reminder_enabled'      => !empty($_POST['reminder_enabled']),
+                    'reminder_day'          => intval($_POST['reminder_day'] ?? 1),
+                    'reminder_hour'         => intval($_POST['reminder_hour'] ?? 18),
+                    'encouragement_enabled' => !empty($_POST['encouragement_enabled']),
+                    'encouragement_day'     => intval($_POST['encouragement_day'] ?? 5),
+                    'encouragement_hour'    => intval($_POST['encouragement_hour'] ?? 18),
                 ];
                 if (function_exists('rcn_save_reminder_config')) {
                     rcn_save_reminder_config($new_config);
@@ -465,8 +465,12 @@ add_shortcode('rcn_send_notifications', function () {
                             <p class="desc">Configure when automated reminders are sent to disciples.</p>
                             
                             <div class="rcn-setting-row">
-                                <input type="checkbox" id="reminders_enabled" name="reminders_enabled" value="1" <?php checked(!empty($config['enabled'])); ?> />
-                                <label for="reminders_enabled">Enable automatic missed submission reminders</label>
+                                <input type="checkbox" id="reminder_enabled" name="reminder_enabled" value="1" <?php checked(!empty($config['reminder_enabled'])); ?> />
+                                <label for="reminder_enabled">Enable first reminder (e.g. Monday)</label>
+                            </div>
+                            <div class="rcn-setting-row">
+                                <input type="checkbox" id="encouragement_enabled" name="encouragement_enabled" value="1" <?php checked(!empty($config['encouragement_enabled'])); ?> />
+                                <label for="encouragement_enabled">Enable follow-up encouragement (e.g. Friday)</label>
                             </div>
                             
                             <div class="rcn-schedule-grid">
